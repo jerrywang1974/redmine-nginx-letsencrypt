@@ -1,4 +1,4 @@
-version: "2"
+version: "3.1"
 
 services:
   nginx:
@@ -38,15 +38,31 @@ services:
       - NGINX_DOCKER_GEN_CONTAINER=nginx-gen
 
   redmine:
-    restart: always
     image: redmine
-    expose:
-      - "3000"
+    container_name: ctone-redmine
+    restart: always
     volumes:
-      - "./volumes/redmine:/usr/src/redmine/files"
+      - /opt/redmine/data:/usr/src/redmine/files
+    ports:
+      - 3000
     environment:
-      - VIRTUAL_HOST=redmine.example.com
-      - VIRTUAL_NETWORK=nginx-proxy
-      - VIRTUAL_PORT=9000
-      - LETSENCRYPT_HOST=redmine.example.com
-      - LETSENCRYPT_EMAIL=webmaster@example.com
+      VIRTUAL_HOST: redmine.example.com
+      VIRTUAL_NETWORK: nginx-proxy
+      VIRTUAL_PORT: 9000
+      LETSENCRYPT_HOST: redmine.example.com
+      LETSENCRYPT_EMAIL: webmaster@example.com
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_PASSWORD: [your_db_password]
+  db:
+    image: mysql:5.7
+    container_name: mysql57
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci
+    restart: always
+    volumes:
+      - /srv/mysql/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: [your_db_password]
+      MYSQL_DATABASE: redmine
+
